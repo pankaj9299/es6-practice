@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/node_modules/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body .inner-body {
+            margin-top: 100px;
+        }
+        .bi {
+          cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="inner-body">
+        <div class="container">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTodo">Add
+                Todo</button>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                        <th scope="col">Last</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                        <td>Otto</td>
+                        <td><i class="bi bi-pencil-fill" data-bs-toggle="tooltip" data-bs-placement="right"
+                                title="Tooltip on right"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/index.js"></script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var todoInstance = new TodoList();
+            var todoForm = document.querySelector('form#add-todo-form');
+            var obj = {};
+            var myModal = new bootstrap.Modal(document.getElementById('addTodo'), {
+              keyboard: false
+            });
+            todoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                var firstName = document.getElementById('first-name').value;
+                var lastName = document.getElementById('last-name').value;
+                obj.firstName = firstName;
+                obj.lastname = lastName;
+                todoInstance.saveTodo(obj);
+                myModal.hide();
+                getListing();
+            }, false);
+
+            getListing();
+
+            // Delete todo
+            var deleteTodo = [].slice.call(document.querySelectorAll('.bi-trash'));
+            deleteTodo.forEach(function (element, index) {
+              element.addEventListener('click', (e) => {
+                  var deletedID = deleteTodo[index].dataset.id;
+                  todoInstance.deleteTodo(deletedID);
+                  getListing();
+              });
+
+            });
+
+            function getListing() {
+              // Get things
+              var listings = todoInstance.getTodo();
+              var listParsed = JSON.parse(listings);
+              console.log(listParsed);
+              var tbodyHtml = '';
+              if(listParsed && listParsed.length > 0) {
+                  for(var i=0;i<listParsed.length;i++) {
+                    tbodyHtml += '<tr>';
+                    tbodyHtml += '<th scope="row">'+(i + 1)+'</th>';
+                    tbodyHtml += '<td>'+listParsed[i].firstName+'</td>';
+                    tbodyHtml += '<td>'+listParsed[i].lastname+'</td>';
+                    tbodyHtml += '<td><i class="bi bi-pencil-fill" data-id="'+(i + 1)+'" data-bs-toggle="tooltip" data-bs-placement="right" title="Tooltip on right"></i>';
+                    tbodyHtml += '<td><i class="bi bi-trash" data-id="'+(i + 1)+'" data-bs-toggle="tooltip" data-bs-placement="right" title="Tooltip on right"></i>';
+                    tbodyHtml += '</td>';
+                    tbodyHtml += '</tr>';
+                  }
+                  document.getElementById("table-body").innerHTML = tbodyHtml;
+              }
+            }
+
+        });
+    </script>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="addTodo" tabindex="-1" aria-labelledby="addTodoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Todo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-todo-form" method="post">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first-name" name="first-name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last-name" name="last-name">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
